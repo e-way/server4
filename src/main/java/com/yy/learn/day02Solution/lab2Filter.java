@@ -14,18 +14,19 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.PushBuilder;
 
 /**
  * Servlet Filter implementation class lab2Filter
  */
 public class lab2Filter implements Filter {
 
-    /**
-     * Default constructor. 
-     */
-    public lab2Filter() {
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * Default constructor.
+	 */
+	public lab2Filter() {
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @see Filter#destroy()
@@ -37,12 +38,21 @@ public class lab2Filter implements Filter {
 	/**
 	 * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
 	 */
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		
-		String name = (String)request.getParameter("name");
-		if (name != null)
-		{
-			request.setAttribute("nameFromFilter", normalizeName(name));
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+		String name = (String) request.getParameter("name");
+		if (name != null) {
+			String inputName = normalizeName(name);
+			
+			List<String> gifFiles = (List<String>) request.getServletContext().getAttribute("gifList");
+			{
+				if (gifFiles.contains(inputName + ".GIF")) {
+					request.setAttribute("nameback", inputName);
+					request.setAttribute("imageFile", inputName + ".GIF");
+				} else {
+					request.setAttribute("nameback", inputName);
+				}
+			}
 		}
 		chain.doFilter(request, response);
 	}
@@ -52,47 +62,37 @@ public class lab2Filter implements Filter {
 	 */
 	public void init(FilterConfig config) throws ServletException {
 		String path = config.getServletContext().getRealPath("/");
-		List<String>imageFiles = getImageFiles(path);
+		List<String> imageFiles = getImageFiles(path);
 		config.getServletContext().setAttribute("gifList", imageFiles);
 	}
-	
-	private static String normalizeName(String name)
-	{
-		if (name!=null && !name.isEmpty())
-		{
+
+	private static String normalizeName(String name) {
+		if (name != null && !name.isEmpty()) {
 			return name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
 		}
 		return null;
 	}
-	
-	private static List<String> getImageFiles(String path)
-	{
-		if (path != null )
-		{
-		    File filePath = new File(path);
-		    if (filePath.isDirectory())
-		    {
-		    	filePath.exists();
-		    	List<File>files = Arrays.asList(filePath.listFiles());
-				List<String>gifFiles = files.stream()
-						.filter(file -> getFileExtension(file).equalsIgnoreCase("gif"))
-						.map(file->file.getName())
-						.collect(Collectors.toList());
+
+	private static List<String> getImageFiles(String path) {
+		if (path != null) {
+			File filePath = new File(path);
+			if (filePath.isDirectory()) {
+				filePath.exists();
+				List<File> files = Arrays.asList(filePath.listFiles());
+				List<String> gifFiles = files.stream().filter(file -> getFileExtension(file).equalsIgnoreCase("gif"))
+						.map(file -> file.getName()).collect(Collectors.toList());
 				return gifFiles;
-		    }
+			}
 		}
 		return new ArrayList<String>();
 	}
-	
-	private static String getFileExtension(File file)
-	{
+
+	private static String getFileExtension(File file) {
 		String extension = "";
-		if (file != null && file.exists())
-		{
+		if (file != null && file.exists()) {
 			String fileName = file.getName();
 			int i = fileName.lastIndexOf(".");
-			if (i > 0)
-			{
+			if (i > 0) {
 				extension = fileName.substring(i + 1);
 			}
 		}
