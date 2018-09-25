@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -14,25 +15,25 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.PushBuilder;
 
 /**
  * Servlet Filter implementation class lab2Filter
  */
 public class lab2Filter implements Filter {
-
+	private List<String> imageFiles;
 	/**
 	 * Default constructor.
 	 */
 	public lab2Filter() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @see Filter#destroy()
 	 */
 	public void destroy() {
-		// TODO Auto-generated method stub
 	}
 
 	/**
@@ -40,13 +41,23 @@ public class lab2Filter implements Filter {
 	 */
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
+		
+		final AsyncContext asyncContext = request.startAsync();
+		asyncContext.addListener(new ImageFileFindListener());
+		asyncContext.start(new Runnable(){
+			@Override
+			public void run() {
+				String path = request.getServletContext().getRealPath("/");
+				imageFiles = getImageFiles(path);
+			}
+		});
+		asyncContext.complete();
+		
 		String name = (String) request.getParameter("name");
 		if (name != null) {
 			String inputName = normalizeName(name);
-			
-			List<String> gifFiles = (List<String>) request.getServletContext().getAttribute("gifList");
 			{
-				if (gifFiles.contains(inputName + ".GIF")) {
+				if (imageFiles !=null && imageFiles.contains(inputName + ".GIF")) {
 					request.setAttribute("nameback", inputName);
 					request.setAttribute("imageFile", inputName + ".GIF");
 				} else {
@@ -61,9 +72,6 @@ public class lab2Filter implements Filter {
 	 * @see Filter#init(FilterConfig)
 	 */
 	public void init(FilterConfig config) throws ServletException {
-		String path = config.getServletContext().getRealPath("/");
-		List<String> imageFiles = getImageFiles(path);
-		config.getServletContext().setAttribute("gifList", imageFiles);
 	}
 
 	private static String normalizeName(String name) {

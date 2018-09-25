@@ -1,14 +1,8 @@
 package com.yy.learn.day02Solution;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.List;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.HttpConstraint;
-import javax.servlet.annotation.ServletSecurity;
-import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +11,7 @@ import javax.servlet.http.PushBuilder;
 /**
  * Servlet implementation class lab2Servlet
  */
-@ServletSecurity(@HttpConstraint(transportGuarantee = TransportGuarantee.CONFIDENTIAL))
+//@ServletSecurity(@HttpConstraint(transportGuarantee = TransportGuarantee.CONFIDENTIAL))
 public class lab2Servlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
@@ -38,7 +32,6 @@ public class lab2Servlet extends HttpServlet {
 		if (pushBuilder != null) {
 			String imageFile = (String) request.getAttribute("imageFile");
 			pushBuilder.path(imageFile).addHeader("content-type", "image/gif").push();
-
 		}
 
 		String method = request.getParameter("method");
