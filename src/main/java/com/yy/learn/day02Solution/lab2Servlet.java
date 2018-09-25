@@ -31,7 +31,10 @@ public class lab2Servlet extends HttpServlet {
 		PushBuilder pushBuilder = request.newPushBuilder();
 		if (pushBuilder != null) {
 			String imageFile = (String) request.getAttribute("imageFile");
-			pushBuilder.path(imageFile).addHeader("content-type", "image/gif").push();
+			if (imageFile != null)
+			{
+				pushBuilder.path(imageFile).addHeader("content-type", "image/gif").push();
+			}
 		}
 
 		String method = request.getParameter("method");
